@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"net/url"
 
 	"fmt"
@@ -10,6 +11,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+)
+
+var (
+	tag = "GPTeaching"
 )
 
 const (
@@ -78,12 +83,12 @@ func makeSearchHeader() http.Header {
 	return header
 }
 
-func makeSearchBody() ([]byte, error) {
+func makeSearchBody(tag string) ([]byte, error) {
 	filter := SearchFilter{
 		Operator: "AND",
 		Terms: []FilterTerm{{
 			Name:  "metadata._gcvi_tags",
-			Value: "GPTeaching",
+			Value: tag,
 		}},
 	}
 	schema := SearchCriteriaSchema{
@@ -109,9 +114,10 @@ func makeSearchRequest(apiUrl string, header http.Header, body []byte) (*http.Re
 }
 
 func main() {
+	flag.StringVar(&tag, "tag", "GPTeaching", "Tag to search for all GPTeaching assets")
 	client := IconikClient{client: &http.Client{}}
 	header := makeSearchHeader()
-	body, err := makeSearchBody()
+	body, err := makeSearchBody(tag)
 	if err != nil {
 		fmt.Errorf("makeSearchBody() failed: %v", err)
 		return
